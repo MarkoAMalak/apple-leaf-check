@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" href="data:,">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Apple Leaf Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one narrow column for a phone held in one hand; photo first, verdict second, evidence after. */
+:root {
+  --bg: #f6f7f2;          /* pale leaf-underside */
+  --panel: #ffffff;
+  --ink: #17201a;
+  --ink-2: #4d5a50;
+  --line: #dde3d8;
+  --leaf: #2f6b3a;        /* accent: mature apple leaf */
+  --leaf-soft: #e3eedf;
+  --bar: #2f6b3a;
+  --bar-track: #e7ebe3;
+  --good: #1d7a45;
+  --bad: #b3261e;
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d9;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111613; --panel: #19201b; --ink: #e8efe7; --ink-2: #a9b6aa; --line: #2c372f;
+    --leaf: #7cc28a; --leaf-soft: #213326; --bar: #7cc28a; --bar-track: #26302a;
+    --good: #6fd39a; --bad: #ff8a80; --warn: #f0c060; --warn-soft: #3a2f16; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111613; --panel: #19201b; --ink: #e8efe7; --ink-2: #a9b6aa; --line: #2c372f;
+  --leaf: #7cc28a; --leaf-soft: #213326; --bar: #7cc28a; --bar-track: #26302a;
+  --good: #6fd39a; --bad: #ff8a80; --warn: #f0c060; --warn-soft: #3a2f16; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--f-body); }
+.wrap { max-width: 34rem; margin: 0 auto; padding-inline: 16px; padding-block: 20px 40px; display: grid; gap: 18px; }
+header { display: grid; gap: 4px; }
+.eyebrow { font: 600 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--leaf); }
+h1 { font: 700 2rem/1.05 var(--f-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+.lede { margin: 0; color: var(--ink-2); max-width: 60ch; }
+.status { font: 400 13px/1.4 var(--f-mono); color: var(--ink-2); }
+.status.err { color: var(--bad); }
+.pick { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { appearance: none; border: 0; border-radius: 12px; padding: 14px 18px; font: 700 16px/1 var(--f-body);
+  background: var(--leaf); color: var(--bg); cursor: pointer; flex: 1 1 12rem; text-align: center; }
+.btn.ghost { background: transparent; color: var(--leaf); box-shadow: inset 0 0 0 2px var(--leaf); }
+.btn:focus-visible, .thumb:focus-visible { outline: 3px solid var(--warn); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; cursor: wait; }
+input[type=file] { display: none; }
+.result { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: grid; }
+.photo { position: relative; background: var(--bar-track); aspect-ratio: 4 / 3; max-width: 100%; display: grid; place-items: center; }
+.photo canvas { width: 100%; height: 100%; object-fit: contain; display: block; }
+.photo .empty { color: var(--ink-2); font-size: 14px; padding: 16px; text-align: center; }
+.verdict { padding: 16px; display: grid; gap: 12px; }
+.vline { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.vname { font: 700 1.6rem/1.1 var(--f-display); margin: 0; }
+.vconf { font: 600 15px/1 var(--f-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.pill { font: 700 13px/1 var(--f-body); padding: 6px 10px; border-radius: 999px; }
+.pill.ok { color: var(--good); box-shadow: inset 0 0 0 1.5px var(--good); }
+.pill.no { color: var(--bad); box-shadow: inset 0 0 0 1.5px var(--bad); }
+.note { margin: 0; font-size: 14px; color: var(--ink-2); }
+.warnbox { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 9.5rem 1fr 3.4rem; gap: 10px; align-items: center; font-size: 14px; }
+.track { height: 10px; background: var(--bar-track); border-radius: 5px; overflow: hidden; }
+.fill { height: 100%; width: 0; background: var(--bar); border-radius: 0 4px 4px 0; transition: width .35s ease; }
+.bar .pct { font: 400 13px/1 var(--f-mono); text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.bar.top { font-weight: 700; }
+.bar.top .pct { color: var(--ink); }
+h2 { font: 700 1.15rem/1.2 var(--f-display); margin: 0; }
+.samples { display: grid; gap: 10px; }
+.strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.thumb { appearance: none; border: 0; padding: 0; background: none; cursor: pointer; display: grid; gap: 4px; text-align: left; min-width: 0; }
+.thumb img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; display: block; border: 2px solid transparent; }
+.thumb[aria-pressed="true"] img { border-color: var(--leaf); }
+.thumb span { font: 400 11px/1.25 var(--f-mono); color: var(--ink-2); overflow-wrap: anywhere; }
+.facts { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 10px; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); }
+th { font: 600 12px/1.2 var(--f-mono); color: var(--ink-2); text-transform: uppercase; letter-spacing: .05em; }
+td.n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.diseases { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.diseases b { font-weight: 700; }
+.diseases i { color: var(--ink-2); }
+footer { font-size: 13px; color: var(--ink-2); }
+@media (max-width: 420px) { .bar { grid-template-columns: 7.6rem 1fr 3rem; } .strip { grid-template-columns: repeat(4, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
+</style>
+</head><body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MSc demo · runs on this phone</div>
+    <h1>Apple Leaf Check</h1>
+    <p class="lede">Photograph one apple leaf, or pick a sample. A MobileNetV2 trained on laboratory and orchard images names the disease. The photo never leaves the phone.</p>
+    <div class="status" id="status" role="status">Loading the model (9.5 MB)…</div>
+  </header>
+
+  <div class="pick">
+    <label class="btn" id="camBtn" for="cam" aria-disabled="true">Take a photo</label>
+    <input type="file" id="cam" accept="image/*" capture="environment">
+    <label class="btn ghost" for="gal">Choose from gallery</label>
+    <input type="file" id="gal" accept="image/*">
+  </div>
+
+  <section class="result" aria-live="polite">
+    <div class="photo"><canvas id="view" width="640" height="480" aria-label="Analysed photo"></canvas></div>
+    <div class="verdict" id="verdict">
+      <p class="note">Waiting for the model…</p>
+    </div>
+  </section>
+
+  <section class="samples">
+    <h2>Held-out samples</h2>
+    <p class="note">None of these images was used to train the model. Lab = PlantVillage, field = FGVC8 or PlantDoc orchard photos.</p>
+    <div class="strip" id="strip"></div>
+  </section>
+
+  <section class="facts">
+    <h2>How good is it?</h2>
+    <p class="note">Accuracy on every image the model never saw in training.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Images</th><th class="n">Count</th><th class="n">Lab-only model</th><th class="n">This model</th></tr></thead>
+        <tbody>
+          <tr><td>PlantVillage test (lab)</td><td class="n">490</td><td class="n">99.8%</td><td class="n">99.4%</td></tr>
+          <tr><td>FGVC8 orchard, 4 classes</td><td class="n">1,200</td><td class="n">38.0%</td><td class="n">93.6%</td></tr>
+          <tr><td>PlantDoc orchard, 3 classes</td><td class="n">58</td><td class="n">77.6%</td><td class="n">81.0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="diseases">
+      <li><b>Apple scab</b> · <i>Venturia inaequalis</i> · olive to dark, velvety spots</li>
+      <li><b>Black rot</b> (frogeye leaf spot) · <i>Botryosphaeria obtusa</i> · round brown spots with a purple rim</li>
+      <li><b>Cedar apple rust</b> · <i>Gymnosporangium juniperi-virginianae</i> · bright yellow-orange spots</li>
+      <li><b>Healthy</b> · no lesion</li>
+    </ul>
+    <p class="note">Limits: one leaf per photo works best. The leaf check only tests that the photo shows leaf tissue; it cannot tell an apple leaf from another plant.</p>
+  </section>
+
+  <footer>Detection and Classification of Apple Diseases Using Machine Learning Techniques · Marko Alkes Malak · Fayoum University.</footer>
+</div>
+
+<script src="ort.wasm.min.js"></script>
+<script>
+(function () {
+  const CLASSES = ["apple_scab", "black_rot", "cedar_apple_rust", "healthy"];
+  const TITLES = ["Apple scab", "Black rot", "Cedar apple rust", "Healthy"];
+  const MEAN = [0.485, 0.456, 0.406], STD = [0.229, 0.224, 0.225];
+  const VEG_MIN = 0.10;   // same leaf-tissue check as the laptop demo
+  const statusEl = document.getElementById("status");
+  const verdict = document.getElementById("verdict");
+  const view = document.getElementById("view");
+  const vctx = view.getContext("2d");
+  let session = null, busy = false;
+
+  function setStatus(t, err) { statusEl.textContent = t; statusEl.classList.toggle("err", !!err); }
+
+  async function loadModel() {
+    try {
+      const base = new URL("./", location.href).href;
+      ort.env.wasm.wasmPaths = base;
+      ort.env.wasm.numThreads = 1;
+      ort.env.wasm.proxy = false;
+      const res = await fetch("model.onnx");
+      if (!res.ok) throw new Error("model file HTTP " + res.status);
+      const buf = new Uint8Array(await res.arrayBuffer());
+      const t0 = performance.now();
+      session = await ort.InferenceSession.create(buf, { executionProviders: ["wasm"] });
+      setStatus("Model ready · loaded in " + Math.round(performance.now() - t0) + " ms");
+      document.getElementById("camBtn").removeAttribute("aria-disabled");
+      return true;
+    } catch (e) {
+      setStatus("The model could not load on this browser (" + e.message + "). Try Chrome or Safari, then reload.", true);
+      return false;
+    }
+  }
+
+  function drawPreview(img) {
+    const W = view.width, H = view.height;
+    vctx.clearRect(0, 0, W, H);
+    const s = Math.min(W / img.width, H / img.height);
+    const w = img.width * s, h = img.height * s;
+    vctx.imageSmoothingQuality = "high";
+    vctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+  }
+
+  // Resize to 224x224 in two steps (closer to the antialiased resize used in training), then normalise to CHW.
+  function toTensor(img) {
+    let src = img, sw = img.width, sh = img.height;
+    while (sw > 448 || sh > 448) {
+      const c = document.createElement("canvas");
+      c.width = Math.max(224, Math.round(sw / 2)); c.height = Math.max(224, Math.round(sh / 2));
+      const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(src, 0, 0, c.width, c.height);
+      src = c; sw = c.width; sh = c.height;
+    }
+    const c = document.createElement("canvas"); c.width = 224; c.height = 224;
+    const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(src, 0, 0, 224, 224);
+    const d = x.getImageData(0, 0, 224, 224).data;
+    const n = 224 * 224, f = new Float32Array(3 * n);
+    let veg = 0;
+    for (let i = 0; i < n; i++) {
+      const r = d[4 * i] / 255, g = d[4 * i + 1] / 255, b = d[4 * i + 2] / 255;
+      f[i] = (r - MEAN[0]) / STD[0]; f[n + i] = (g - MEAN[1]) / STD[1]; f[2 * n + i] = (b - MEAN[2]) / STD[2];
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), s = mx > 0 ? (mx - mn) / (mx + 1e-8) : 0;
+      if (g >= r * 0.9 && g >= b && s > 0.15 && mx > 0.12) veg++;
+    }
+    return { tensor: new ort.Tensor("float32", f, [1, 3, 224, 224]), veg: veg / n };
+  }
+
+  function render(probs, ms, veg, truth) {
+    if (veg < VEG_MIN) {
+      verdict.innerHTML = '<p class="vname">Not an apple leaf?</p>' +
+        '<div class="warnbox">Only ' + Math.round(veg * 100) + '% of the pixels look like leaf tissue, so no diagnosis is given. Fill the frame with one leaf and try again.</div>';
+      return;
+    }
+    const order = [0, 1, 2, 3].sort((a, b) => probs[b] - probs[a]);
+    const top = order[0];
+    let pill = "";
+    if (truth != null) {
+      const ok = CLASSES[top] === truth;
+      pill = '<span class="pill ' + (ok ? "ok" : "no") + '">' + (ok ? "Correct" : "Wrong · true: " + TITLES[CLASSES.indexOf(truth)]) + "</span>";
+    }
+    let html = '<div class="vline"><p class="vname">' + TITLES[top] + '</p><span class="vconf">' + (probs[top] * 100).toFixed(1) + "%</span></div>";
+    if (pill) html += "<div>" + pill + "</div>";
+    if (probs[top] < 0.6) html += '<div class="warnbox">Low confidence. Try a sharper photo of a single leaf.</div>';
+    html += '<div class="bars">';
+    for (const i of order) {
+      html += '<div class="bar' + (i === top ? " top" : "") + '"><span>' + TITLES[i] + '</span><div class="track"><div class="fill" style="width:' +
+        (probs[i] * 100).toFixed(1) + '%"></div></div><span class="pct">' + (probs[i] * 100).toFixed(1) + "%</span></div>";
+    }
+    html += '</div><p class="note">Computed on this phone in ' + Math.round(ms) + " ms.</p>";
+    verdict.innerHTML = html;
+  }
+
+  async function analyse(img, truth) {
+    if (!session || busy) return;
+    busy = true;
+    try {
+      drawPreview(img);
+      const { tensor, veg } = toTensor(img);
+      const t0 = performance.now();
+      const out = await session.run({ input: tensor });
+      const ms = performance.now() - t0;
+      render(Array.from(out.probs.data), ms, veg, truth);
+    } catch (e) {
+      verdict.innerHTML = '<div class="warnbox">This photo could not be analysed (' + e.message + "). Try another one.</div>";
+    } finally { busy = false; }
+  }
+
+  function loadImage(src) {
+    return new Promise((ok, bad) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => bad(new Error("image failed to load")); im.src = src; });
+  }
+
+  async function fromFile(file) {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    try { const im = await loadImage(url); document.querySelectorAll(".thumb").forEach(t => t.setAttribute("aria-pressed", "false")); await analyse(im, null); }
+    catch (e) { verdict.innerHTML = '<div class="warnbox">That file is not an image this browser can open.</div>'; }
+    finally { URL.revokeObjectURL(url); }
+  }
+  document.getElementById("cam").addEventListener("change", e => fromFile(e.target.files[0]));
+  document.getElementById("gal").addEventListener("change", e => fromFile(e.target.files[0]));
+
+  const SAMPLES = [
+    { src: "samples/s1.jpg", label: "black_rot", domain: "Lab" },
+    { src: "samples/s2.jpg", label: "cedar_apple_rust", domain: "Lab" },
+    { src: "samples/s3.jpg", label: "apple_scab", domain: "Field" },
+    { src: "samples/s4.jpg", label: "black_rot", domain: "Field" },
+    { src: "samples/s5.jpg", label: "cedar_apple_rust", domain: "Field" },
+    { src: "samples/s6.jpg", label: "healthy", domain: "Field" },
+    { src: "samples/s7.jpg", label: "cedar_apple_rust", domain: "Field" },
+    { src: "samples/s8.jpg", label: "apple_scab", domain: "Field" }
+  ];
+  const strip = document.getElementById("strip");
+  SAMPLES.forEach((s, k) => {
+    const b = document.createElement("button");
+    b.className = "thumb"; b.type = "button"; b.id = "sample" + (k + 1); b.setAttribute("aria-pressed", "false");
+    b.innerHTML = '<img src="' + s.src + '" alt="' + s.domain + " sample, " + TITLES[CLASSES.indexOf(s.label)] + '"><span>' + s.domain + " · " + TITLES[CLASSES.indexOf(s.label)] + "</span>";
+    b.addEventListener("click", async () => {
+      document.querySelectorAll(".thumb").forEach(t => t.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      const im = await loadImage(s.src); await analyse(im, s.label);
+    });
+    strip.appendChild(b);
+  });
+
+  // Open in a working state: draw the first field sample at once, analyse it when the model is ready.
+  loadImage(SAMPLES[4].src).then(drawPreview).catch(() => {});
+  loadModel().then(ok => { if (ok) document.getElementById("sample5").click(); });
+})();
+</script>
+</body></html>
