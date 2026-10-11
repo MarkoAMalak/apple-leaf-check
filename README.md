@@ -7,7 +7,7 @@ Apple leaf disease check that runs entirely in the phone browser. Open the page,
 ## Model
 - MobileNetV2 (2.39 M parameters), first trained on the leakage-free PlantVillage apple split, then fine-tuned on PlantVillage + FGVC8 + PlantDoc field training images.
 - Exported to ONNX and run with ONNX Runtime Web (WebAssembly, one thread).
-- Accuracy on images never used in training: PlantVillage test 100.0% (490 images), FGVC8 field 96.8% (1,200), PlantDoc field 87.9% (58, three classes).
+- Accuracy on images never used in training: PlantVillage test 99.8% (490 images), FGVC8 field 96.7% (1,200), PlantDoc field 89.7% (58, three classes). Trained with extra blur, brightness and noise augmentation, so moderately blurred or noisy photos keep working.
 - A simple leaf-tissue check refuses photos that do not look like a leaf. It cannot tell an apple leaf from the leaf of another plant.
 
 Part of the MSc thesis *Detection and Classification of Apple Diseases Using Machine Learning Techniques*, Marko Alkes Malak, Fayoum University. Code and experiments: https://github.com/MarkoAMalak/apple-leaf-disease-framework
